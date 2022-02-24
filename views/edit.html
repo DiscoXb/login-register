@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: black;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Add padding to containers */
+    .container {
+      padding: 16px;
+      background-color: white;
+    }
+
+    /* Full-width input fields */
+    input[type=text],
+    input[type=password] {
+      width: 100%;
+      padding: 15px;
+      margin: 5px 0 22px 0;
+      display: inline-block;
+      border: none;
+      background: #f1f1f1;
+    }
+
+    input[type=text]:focus,
+    input[type=password]:focus {
+      background-color: #ddd;
+      outline: none;
+    }
+
+    /* Overwrite default styles of hr */
+    hr {
+      border: 1px solid #f1f1f1;
+      margin-bottom: 25px;
+    }
+
+    /* Set a style for the submit button */
+    .editbtn {
+      background-color: #008ECC;
+      color: white;
+      padding: 16px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      opacity: 0.9;
+    }
+
+    .registerbtn:hover {
+      opacity: 1;
+    }
+
+    /* Add a blue text color to links */
+    a {
+      color: dodgerblue;
+    }
+
+    /* Set a grey background color and center the text of the "sign in" section */
+    .signin {
+      background-color: #f1f1f1;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Personal Info</h1>
+    <p>Edit your profile.</p>
+    <hr>
+    <img id="display" />
+    <input type="file" id="img" name="img" accept="image/*" onchange="getBaseUrl()"> <br></br>
+
+    <label for="firstname"><b>Firstname</b></label>
+    <input type="text" placeholder="Enter Firstname" name="firstname" id="firstname" required maxlength="20"
+      onkeypress="return (event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)">
+
+    <label for="lastname"><b>Lastname</b></label>
+    <input type="text" placeholder="Enter Lastname" name="lastname" id="lastname" required maxlength="20"
+      onkeypress="return (event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122)">
+
+    <label for="username"><b>Username</b></label>
+    <input type="text" placeholder="Enter Username" name="username" id="username" required minlength="3" maxlength="12" disabled>
+
+    <label for="psw"><b>Password</b></label>
+    <input type="password" placeholder="Enter Password" name="psw" id="password" required minlength="6" maxlength="18"
+      onkeypress="return (event.charCode >= 65 && event.charCode <= 90) || (event.charCode >= 97 && event.charCode <= 122) || (event.charCode >= 48 && event.charCode <= 57)">
+
+    <label for="psw-repeat"><b>Repeat Password</b></label>
+    <input type="password" placeholder="Repeat Password" name="psw-repeat" id="psw-repeat" required minlength="6"
+      maxlength="18">
+    <hr>
+
+    <button id="btnEdit" type="submit" class="editbtn">Confirm</button>
+  </div>
+
+  <div class="container signin">
+    <p>Sign in another account <a href="login.html">Sign in</a>.</p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search)
+    let usernameLogin = params.get("username");
+    let image = "";
+    function getBaseUrl() {
+      var file = document.querySelector('input[type=file]')['files'][0];
+      var reader = new FileReader();
+      var baseString;
+      reader.onloadend = function () {
+        baseString = reader.result;
+        image = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    $(document).ready(function () {
+      var handleGetUser = function (res, status) {
+        // console.log(res);
+        if (res.result == true) {
+          $("#firstname").val(res.data.firstname);
+          $("#lastname").val(res.data.lastname);
+          $("#username").val(res.data.username);
+          $("#display").attr('src', res.data.image);
+        }
+        else {
+          location.href = "register.html"
+        }
+      };
+      $.post("http://127.0.0.1:6969/user", { username: usernameLogin }, handleGetUser);
+      $("#btnEdit").click(function () {
+        var firstname = $("#firstname").val();
+        var lastname = $("#lastname").val();
+        var username = $("#username").val();
+        var password = $("#password").val();
+        var pswRepeat = $("#psw-repeat").val();
+        // var image = $("#display").val();
+        var url = "http://127.0.0.1:6969/update"
+        var reqData = {
+          firstname: firstname,
+          lastname: lastname,
+          username: username,
+          password: password,
+          image: image,
+        };
+        // console.log(reqData)
+
+        var handleResponse = function (res, status) {
+          // console.log(res);
+          if (res.result) {
+            $("#firstname").val(res.data.firstname);
+            $("#lastname").val(res.data.lastname);
+            $("#display").attr('src', res.data.image);
+          }
+          else {
+
+          }
+        };
+        $.post(url, reqData, handleResponse);
+      });
+    });
+  </script>
+</body>
+
+</html>
