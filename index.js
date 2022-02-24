@@ -36,7 +36,6 @@ app.post("/user", async (req, res) => {
 
 //register api, check duplicate username and send json to create data
 app.post("/register", async (req, res) => {
-  // console.log(req.body)
   let firstname = req.body.firstname
   let lastname = req.body.lastname
   let username = req.body.username
